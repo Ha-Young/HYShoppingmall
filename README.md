@@ -1,2 +1,7 @@
 # HYShoppingmall
-HYShoppingmall made by Django
+
+## 장고로 만들어보는 쇼핑몰 (일부)
+- 회원관리
+- 상품관리
+- 주문관리
+
