@@ -14,7 +14,7 @@
             </thead>
             <tbody class="text-dark">
                 {% for product in product_list %}
-                <tr onClick = "location.href='/product/{{ product.id }}'">
+                <tr onClick = "location.href='/product/{{ product.id }}'" >
                     <th scope="row">{{ product.id }}</th>
                     <th scope="row">{{ product.name }}</th>
                     <th scope="row">{{ product.price | intcomma}}</th>
