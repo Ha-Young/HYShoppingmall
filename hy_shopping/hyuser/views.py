@@ -2,11 +2,18 @@ from django.shortcuts import render
 from django.views.generic.edit import FormView
 from .forms import RegisterForm
 from .forms import LoginForm
+from .models import Hyuser
 
 # Create your views here.
 
 
 def index(request):
+    user_id = request.session.get('user')
+    if user_id:
+        hyuser = Hyuser.objects.get(id=request.session.get('user'))
+        if hyuser:
+            return render(request, 'index.html', {'email': hyuser.email})
+
     return render(request, 'index.html')
 
 

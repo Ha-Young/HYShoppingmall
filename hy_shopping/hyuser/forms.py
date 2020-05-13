@@ -85,10 +85,10 @@ class LoginForm(forms.Form):
         if email and password:
             try:
                 hyuser = Hyuser.objects.get(email=email)
-            except Hyuser.DoseNotExist as e:
-                print(e)
-                self.add_error('email', '없는 email 입니다')
-                return
+            # except Hyuser.DoseNotExist as e:
+            #     print(e)
+            #     self.add_error('email', '없는 email 입니다')
+            #     return
             except Exception as e:
                 print(e)
                 self.add_error('email', '알수없는 오류')
