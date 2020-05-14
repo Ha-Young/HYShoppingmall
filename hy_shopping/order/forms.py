@@ -1,5 +1,6 @@
 from django import forms
 from .models import Order
+from django.db import transaction
 from product.models import Product
 from hyuser.models import Hyuser
 
@@ -36,13 +37,17 @@ class RegisterForm(forms.Form):
         hyuser = self.request.session.get('user')
 
         if quantity and product and hyuser:
-            order = Order(
-                quantity=quantity,
-                product=Product.objects.get(pk=product),
-                hyuser=Hyuser.objects.get(pk=hyuser)
-            )
+            with transaction.atomic():
+                productObj = Product.objects.get(pk=product)
+                order = Order(
+                    quantity=quantity,
+                    product=productObj,
+                    hyuser=Hyuser.objects.get(pk=hyuser)
+                )
+                order.save()
+                productObj.stock -= quantity
+                productObj.save()
 
-            order.save()
         else:
             self.product = product
             self.add_error('quantity', '값이 없습니다')
