@@ -24,3 +24,6 @@ class RegisterForm(forms.Form):
         print("clean")
         cleaned_data = super().clean()
         
+        quantity = cleaned_data.get('quantity')
+        product = cleaned_data.get('product')
+        
