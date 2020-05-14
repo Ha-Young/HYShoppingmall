@@ -23,6 +23,9 @@ class OrderCreate(FormView):
 
 
 class OrderList(ListView):
-    model = Order
     template_name = 'order.html'
     context_object_name = 'order_list'
+
+    def get_queryset(self, **kwargs):
+        queryset = Order.objects.filter(hyuser__id=self.request.session.get('user'))
+        return queryset
