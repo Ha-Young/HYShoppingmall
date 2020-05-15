@@ -1,5 +1,6 @@
 from django.shortcuts import render, redirect
 from django.views.generic.edit import FormView
+from django.contrib.auth.hashers import check_password, make_password
 from .forms import RegisterForm
 from .forms import LoginForm
 from .models import Hyuser
@@ -21,6 +22,17 @@ class RegisterView(FormView):
     template_name = 'register.html'
     form_class = RegisterForm
     success_url = '/'
+
+    def form_valid(self, form):
+        new_hyuser = Hyuser(
+            email=form.data.get('email'),
+            password=make_password(form.data.get('password')),
+            level="user"
+        )
+        new_hyuser.save()
+
+        return super().form_valid(form)
+
 
 class LoginView(FormView):
     template_name = 'login.html'

@@ -36,19 +36,6 @@ class RegisterForm(forms.Form):
         product = cleaned_data.get('product')
         hyuser = self.request.session.get('user')
 
-        if quantity and product and hyuser:
-            with transaction.atomic():
-                productObj = Product.objects.get(pk=product)
-                order = Order(
-                    quantity=quantity,
-                    product=productObj,
-                    hyuser=Hyuser.objects.get(pk=hyuser)
-                )
-                order.save()
-                productObj.stock -= quantity
-                productObj.save()
-
-        else:
-            self.product = product
+        if not (quantity and product):
             self.add_error('quantity', '값이 없습니다')
             self.add_error('product', '값이 없습니다')
