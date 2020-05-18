@@ -1,5 +1,33 @@
 {% extends 'base.html' %}
 {% load humanize %}
+{% block header %}
+<script>
+    function get_product_info(product) {
+        return  "상품명 : " + product.name + "<br/>" +
+                "가격 : " + product.price;
+    }
+
+    function product_detail(id) {
+        $.ajax({
+            url: "/api/product/" + id,
+            success: function(result){
+                $("#js-product-" + id).popover({
+                    html: true,
+                    content: get_product_info(result)
+                }).popover('show');
+            }
+        });
+    }
+
+    function product_leave(id) {
+        $("#js-product-" + id).popover('hide');
+    }
+    
+    $(document).ready(function(){
+        
+    });
+</script>
+{% endblock header %}
 {% block contents %}
 <div class="row mt-5">
     <div class="col-12">
@@ -14,9 +42,15 @@
             </thead>
             <tbody class="text-dark">
                 {% for product in product_list %}
-                <tr onClick = "location.href='/product/{{ product.id }}'" >
+                <tr>
                     <th scope="row">{{ product.id }}</th>
-                    <th scope="row">{{ product.name }}</th>
+                    <th scope="row">
+                        <a id="js-product-{{product.id}}" 
+                            onmouseenter="product_detail({{ product.id }})" 
+                            onmouseleave="product_leave({{ product.id }})"
+                            href="/product/{{ product.id }}">{{ product.name }}
+                        </a>
+                    </th>
                     <th scope="row">{{ product.price | intcomma}}</th>
                     <th scope="row">{{ product.registered_dttm | date:'Y-m-d H:i' }}</th>
                 </tr>

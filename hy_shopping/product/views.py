@@ -14,7 +14,7 @@ from order.forms import RegisterForm as OrderForm
 
 class ProductListAPI(generics.GenericAPIView, mixins.ListModelMixin):
     serializer_class = ProductSerializer
-
+    
     def get_queryset(self):
         return Product.objects.all().order_by('pk')
 
