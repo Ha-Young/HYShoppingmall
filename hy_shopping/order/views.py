@@ -8,8 +8,22 @@ from .forms import RegisterForm
 from product.models import Product
 from hyuser.models import Hyuser
 from hyuser.decorator import login_required
+from .serializers import OrderSerializer
+from rest_framework import generics
+from rest_framework import mixins
 
 # Create your views here.
+
+
+class OrderListAPI(generics.GenericAPIView, mixins.ListModelMixin):
+    serializer_class = OrderSerializer
+    
+    def get_queryset(self):
+        return Order.objects.all().order_by('pk')
+
+    def get(self, request, *args, **kwargs):
+        return self.list(request, *args, **kwargs)
+
 
 @method_decorator(login_required, name='dispatch')
 class OrderCreate(FormView):
