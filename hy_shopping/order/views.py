@@ -19,7 +19,13 @@ class OrderListAPI(generics.GenericAPIView, mixins.ListModelMixin):
     serializer_class = OrderSerializer
     
     def get_queryset(self):
-        return Order.objects.all().order_by('pk')
+        queryset = Order.objects.all()
+        product = self.request.query_params.get('product', None)
+        print(product)
+        if product is not None:
+            queryset = queryset.filter(product=product).order_by("-pk")
+        
+        return queryset
 
     def get(self, request, *args, **kwargs):
         return self.list(request, *args, **kwargs)
