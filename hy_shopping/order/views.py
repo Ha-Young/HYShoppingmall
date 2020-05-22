@@ -20,14 +20,16 @@ class OrderListAPI(generics.GenericAPIView, mixins.ListModelMixin):
     
     def get_queryset(self):
         queryset = Order.objects.all()
-        products = self.request.query_params.get('product', None).split(',')
-        print(products)
-        if products is not None:
-            for product in products:
-                queryset &= queryset.filter(product=product)
-            # queryset = queryset.filter(product=1, hyuser="3").order_by("-pk")
-        
-        return queryset
+
+        product = self.request.query_params.get('product', None)
+        product_querySet = Order.objects.none()
+        if product != None:
+            products = product.split(',')
+
+            for product_one in products:
+                product_querySet |= queryset.filter(product = product_one)
+                
+        return product_querySet
 
     def get(self, request, *args, **kwargs):
         return self.list(request, *args, **kwargs)
