@@ -42,6 +42,7 @@ def getRegisterDateQuerySet(req):
     
     return register_date_querySet
 
+
 def getHyuserQuerySet(req):
     hyuser = req.query_params.get('hyuser', None)
     hyuser_querySet = Order.objects.all()
@@ -66,6 +67,45 @@ def getQuantityQuerySet(req):
     
     return quantity_querySet
 
+def getDateRangeQuerySet(req):
+    startday = req.query_params.get('startday', None)
+    endday = req.query_params.get('endday', None)
+    
+    sortedRegisterDateQuerySet = Order.objects.order_by('register_date')
+    earliest = sortedRegisterDateQuerySet[0].register_date
+    # latest = sortedRegisterDateQuerySet[sortedRegisterDateQuerySet.count()-1].register_date
+
+    # print(earliest, latest)
+    print(earliest, datetime.date.today())
+
+    if startday != None:
+        startday_split = list(map(int, startday.split('-')))
+        if len(startday_split) == 3:
+            startday = datetime.date(startday_split[0], startday_split[1], startday_split[2])
+        else:
+            startday = earliest.date()
+    else:
+        startday = earliest.date()
+
+    if endday != None:
+        endday_split = list(map(int, endday.split('-')))
+        if len(endday_split) == 3:
+            endday = datetime.date(endday_split[0], endday_split[1], endday_split[2]) + datetime.timedelta(days=1)
+        else:
+            endday = datetime.date.today() + datetime.timedelta(days=1)
+    else:
+        endday = datetime.date.today() + datetime.timedelta(days=1)
+
+
+    print(startday, " ~ ", endday)
+
+    if endday < startday:
+        print("uncollect day range")
+        return Order.objects.all()
+
+    dateRangeQuerySet = Order.objects.filter(register_date__range=[startday, endday])
+
+    return dateRangeQuerySet
 
 class OrderListAPI(generics.GenericAPIView, mixins.ListModelMixin):
     serializer_class = OrderSerializer
@@ -74,33 +114,28 @@ class OrderListAPI(generics.GenericAPIView, mixins.ListModelMixin):
         queryset = Order.objects.all()
 
         # product queryset을 구한다
-        product_querySet = getProductQuerySet(self.request)
+        # product_querySet = getProductQuerySet(self.request)
         
+        # # register_date queryset을 구한다
+        # register_date_querySet = getRegisterDateQuerySet(self.request)
 
-        # register_date queryset을 구한다
-        register_date_querySet = getRegisterDateQuerySet(self.request)
+        # # hyuser queryset을 구한다
+        # hyuser_querySet = getHyuserQuerySet(self.request)
 
-        # hyuser queryset을 구한다
-        hyuser_querySet = getHyuserQuerySet(self.request)
+        # # quantity queryset을 구한다
+        # quantity_querySet = getQuantityQuerySet(self.request)
 
-        # quantity queryset을 구한다
-        quantity_querySet = getQuantityQuerySet(self.request)
-
-        return product_querySet & register_date_querySet & hyuser_querySet & quantity_querySet
-
+        # date range queryset을 구한다
         # 주문의 기간 (시작 . 끝 ) / 시작이 없으면 처음, 끝이 없으면 오늘날
-        # ToDo
-        startday = self.request.query_params.get('startday', None)
-        endday = self.request.query_params.get('endday', None)
+        dateRangeQuerySet = getDateRangeQuerySet(self.request)
+
+        return dateRangeQuerySet
+
+        # return product_querySet & register_date_querySet & hyuser_querySet & quantity_querySet & dateRangeQuerySet
+
         
-        if startday != None:
-            startday_split = startday.split('-')
-            if len(startday_split) == 3:
-                startday = datetime.date(startday_split[0], startday_split[1], startday_split[2])
-            else:
-                startday = datetime.date.today()
-        else:
-            startday = datetime.date.today()
+        # ToDo
+
 
         # 주문 가격 (시작 ~ 끝) / 시작이 없으면 끝값 이하, 끝이 없으면 시작 이상
 
