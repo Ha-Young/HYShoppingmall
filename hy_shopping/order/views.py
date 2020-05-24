@@ -123,7 +123,36 @@ def getEmailQuerySet(req):
 
     return email_querySet
 
+def getPriceRangeQuerySet(req):
+    startprice = req.query_params.get('startprice', None)
+    endprice = req.query_params.get('endprice', None)
 
+    if startprice is None and endprice is None:
+        return Order.objects.all()
+
+    sortedPriceQuerySet = Order.objects.order_by('price')
+    ceapest = sortedPriceQuerySet[0].price
+    expensive = sortedPriceQuerySet[sortedPriceQuerySet.count() - 1].price
+
+    if startprice != None:
+        startprice = int(startprice)
+    else:
+        startprice = int(ceapest)
+
+    if endprice != None:
+        endprice = int(endprice)
+    else:
+        endprice = int(expensive)
+
+    print(startprice, " ~ ", endprice)
+
+    if endprice < startprice:
+        print("uncollect price range")
+        return Order.objects.all()
+
+    priceRangeQuerySet = Order.objects.filter(price__range=[startprice, endprice])
+
+    return priceRangeQuerySet
 
 
 class OrderListAPI(generics.GenericAPIView, mixins.ListModelMixin):
@@ -150,12 +179,14 @@ class OrderListAPI(generics.GenericAPIView, mixins.ListModelMixin):
 
         # price range queryset을 구한다
         # 주문 가격 (시작 ~ 끝) / 시작이 없으면 끝값 이하, 끝이 없으면 시작 이상
+        priceRangeQuerySet = getPriceRangeQuerySet(self.request)
 
         return  product_querySet\
                 & register_date_querySet\
                 & hyuser_querySet\
                 & quantity_querySet\
                 & dateRangeQuerySet\
+                & priceRangeQuerySet
         
         # ToDo
 
