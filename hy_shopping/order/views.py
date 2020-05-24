@@ -15,6 +15,7 @@ import datetime
 
 # Create your views here.
 
+# product에 대한 queryset을 가져옵니다
 def getProductQuerySet(req):
     product = req.query_params.get('product', None)
     print(product)
@@ -26,8 +27,11 @@ def getProductQuerySet(req):
 
         for product_one in products:
             product_querySet |= Order.objects.filter(product = product_one)
+
+    # product name에 대한 queryset을 가져옵니다
+    productname_querySet = getProductNameQuerySet(req)
     
-    return product_querySet
+    return product_querySet & productname_querySet
 
 # register_date 관련된 queryset을 가져옵니다.
 def getRegisterDateQuerySet(req):
@@ -123,6 +127,15 @@ def getEmailQuerySet(req):
 
     return email_querySet
 
+# product name에 대한 queryset을 가져옵니다
+def getProductNameQuerySet(req):
+    productname = req.query_params.get('productname', None)
+    productname_querySet = Order.objects.all()
+
+    if productname != None:
+        productname_querySet = Order.objects.filter(product__name=productname)
+
+# order price(총 금액)에 대한 queryset을 가져옵니다
 def getPriceRangeQuerySet(req):
     startprice = req.query_params.get('startprice', None)
     endprice = req.query_params.get('endprice', None)
@@ -189,8 +202,6 @@ class OrderListAPI(generics.GenericAPIView, mixins.ListModelMixin):
                 & priceRangeQuerySet
         
         # ToDo
-
-
 
         # 제품명
 
