@@ -11,8 +11,60 @@ from hyuser.decorator import login_required
 from .serializers import OrderSerializer
 from rest_framework import generics
 from rest_framework import mixins
+import datetime
 
 # Create your views here.
+
+def getProductQuerySet(req):
+    product = req.query_params.get('product', None)
+    print(product)
+    product_querySet = Order.objects.all()
+
+    if product != None:
+        products = product.split(',')
+        product_querySet = Order.objects.none()
+
+        for product_one in products:
+            product_querySet |= Order.objects.filter(product = product_one)
+    
+    return product_querySet
+
+def getRegisterDateQuerySet(req):
+    register_date = req.query_params.get('register_date', None)
+    register_date_querySet = Order.objects.all()
+
+    if register_date != None:
+        register_date_querySet = Order.objects.none()
+        register_dates = register_date.split(',')
+
+        for register_date_one in register_dates:
+            register_date_querySet |= Order.objects.filter(register_date__contains = register_date_one)
+    
+    return register_date_querySet
+
+def getHyuserQuerySet(req):
+    hyuser = req.query_params.get('hyuser', None)
+    hyuser_querySet = Order.objects.all()
+
+    if hyuser != None:
+        hyuser_querySet = Order.objects.none()
+        hyusers = hyuser.split(',')
+        print("here", hyusers)
+
+        for hyuser_one in hyusers:
+            hyuser_querySet |= Order.objects.filter(hyuser = hyuser_one)
+
+    return hyuser_querySet
+
+def getQuantityQuerySet(req):
+    quantity = req.query_params.get('quantity', None)
+    quantity_querySet = Order.objects.all()
+
+    if quantity != None:
+        print(quantity)
+        quantity_querySet = Order.objects.filter(quantity=quantity)
+    
+    return quantity_querySet
 
 
 class OrderListAPI(generics.GenericAPIView, mixins.ListModelMixin):
@@ -22,48 +74,47 @@ class OrderListAPI(generics.GenericAPIView, mixins.ListModelMixin):
         queryset = Order.objects.all()
 
         # product queryset을 구한다
-        product = self.request.query_params.get('product', None)
-        product_querySet = Order.objects.all()
-
-        if product != None:
-            products = product.split(',')
-            product_querySet = Order.objects.none()
-
-            for product_one in products:
-                product_querySet |= queryset.filter(product = product_one)
+        product_querySet = getProductQuerySet(self.request)
+        
 
         # register_date queryset을 구한다
-        register_date = self.request.query_params.get('register_date', None)
-        register_date_querySet = Order.objects.all()
-
-        if register_date != None:
-            register_date_querySet = Order.objects.none()
-            register_dates = register_date.split(',')
-
-            for register_date_one in register_dates:
-                register_date_querySet |= queryset.filter(register_date__contains = register_date_one)
+        register_date_querySet = getRegisterDateQuerySet(self.request)
 
         # hyuser queryset을 구한다
-        hyuser = self.request.query_params.get('hyuser', None)
-        hyuser_querySet = Order.objects.all()
-
-        if hyuser != None:
-            hyuser_querySet = Order.objects.none()
-            hyusers = hyuser.split(',')
-            print("here", hyusers)
-
-            for hyuser_one in hyusers:
-                hyuser_querySet |= queryset.filter(hyuser = hyuser_one)
+        hyuser_querySet = getHyuserQuerySet(self.request)
 
         # quantity queryset을 구한다
-        quantity = self.request.query_params.get('quantity', None)
-        quantity_querySet = Order.objects.all()
-
-        if quantity != None:
-            print(quantity)
-            quantity_querySet = Order.objects.filter(quantity=quantity)
+        quantity_querySet = getQuantityQuerySet(self.request)
 
         return product_querySet & register_date_querySet & hyuser_querySet & quantity_querySet
+
+        # 주문의 기간 (시작 . 끝 ) / 시작이 없으면 처음, 끝이 없으면 오늘날
+        # ToDo
+        startday = self.request.query_params.get('startday', None)
+        endday = self.request.query_params.get('endday', None)
+        
+        if startday != None:
+            startday_split = startday.split('-')
+            if len(startday_split) == 3:
+                startday = datetime.date(startday_split[0], startday_split[1], startday_split[2])
+            else:
+                startday = datetime.date.today()
+        else:
+            startday = datetime.date.today()
+
+        # 주문 가격 (시작 ~ 끝) / 시작이 없으면 끝값 이하, 끝이 없으면 시작 이상
+
+        # 제품명
+
+        # 제품가격
+
+        # 제품 총개수 -> 다른곳?
+
+        # email 주소 특정 도매인
+
+        # 특정 기간에 가입한
+
+        # ordering
 
     def get(self, request, *args, **kwargs):
         return self.list(request, *args, **kwargs)
