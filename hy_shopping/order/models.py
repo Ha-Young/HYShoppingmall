@@ -7,6 +7,7 @@ class Order(models.Model):
     hyuser = models.ForeignKey("hyuser.Hyuser", on_delete=models.CASCADE, verbose_name="사용자")
     product = models.ForeignKey("product.Product", on_delete=models.CASCADE, verbose_name="상품")
     quantity = models.IntegerField(verbose_name="수량")
+    price = models.IntegerField(verbose_name="주문 총액")
     register_date = models.DateTimeField(auto_now_add=True, verbose_name="등록일")
     
     def __str__(self):

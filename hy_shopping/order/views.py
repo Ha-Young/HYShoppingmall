@@ -29,6 +29,7 @@ def getProductQuerySet(req):
     
     return product_querySet
 
+# register_date 관련된 queryset을 가져옵니다.
 def getRegisterDateQuerySet(req):
     register_date = req.query_params.get('register_date', None)
     register_date_querySet = Order.objects.all()
@@ -43,6 +44,7 @@ def getRegisterDateQuerySet(req):
     return register_date_querySet
 
 
+# hyuser queryset을 가져옵니다.
 def getHyuserQuerySet(req):
     hyuser = req.query_params.get('hyuser', None)
     hyuser_querySet = Order.objects.all()
@@ -55,18 +57,22 @@ def getHyuserQuerySet(req):
         for hyuser_one in hyusers:
             hyuser_querySet |= Order.objects.filter(hyuser = hyuser_one)
 
-    return hyuser_querySet
+    # email 주소 특정 도매인에 대한 queryset을 가져옵니다
+    email_querySet = getEmailQuerySet(req)
 
+    return hyuser_querySet & email_querySet
+
+# quantity queryset을 가져옵니다
 def getQuantityQuerySet(req):
     quantity = req.query_params.get('quantity', None)
     quantity_querySet = Order.objects.all()
 
     if quantity != None:
-        print(quantity)
         quantity_querySet = Order.objects.filter(quantity=quantity)
     
     return quantity_querySet
 
+# 지정된 날짜 range에 대한 queryset을 가져옵니다 [startday, endday]
 def getDateRangeQuerySet(req):
     startday = req.query_params.get('startday', None)
     endday = req.query_params.get('endday', None)
@@ -107,6 +113,19 @@ def getDateRangeQuerySet(req):
 
     return dateRangeQuerySet
 
+# email 주소 특정 도매인에 대한 queryset을 가져옵니다
+def getEmailQuerySet(req):
+    email = req.query_params.get('email', None)
+    email_querySet = Order.objects.all()
+
+    if email != None:
+        email_querySet = Order.objects.filter(hyuser__email=email)
+
+    return email_querySet
+
+
+
+
 class OrderListAPI(generics.GenericAPIView, mixins.ListModelMixin):
     serializer_class = OrderSerializer
     
@@ -114,38 +133,39 @@ class OrderListAPI(generics.GenericAPIView, mixins.ListModelMixin):
         queryset = Order.objects.all()
 
         # product queryset을 구한다
-        # product_querySet = getProductQuerySet(self.request)
+        product_querySet = getProductQuerySet(self.request)
         
-        # # register_date queryset을 구한다
-        # register_date_querySet = getRegisterDateQuerySet(self.request)
+        # register_date queryset을 구한다
+        register_date_querySet = getRegisterDateQuerySet(self.request)
 
-        # # hyuser queryset을 구한다
-        # hyuser_querySet = getHyuserQuerySet(self.request)
+        # hyuser queryset을 구한다
+        hyuser_querySet = getHyuserQuerySet(self.request)
 
-        # # quantity queryset을 구한다
-        # quantity_querySet = getQuantityQuerySet(self.request)
+        # quantity queryset을 구한다
+        quantity_querySet = getQuantityQuerySet(self.request)
 
         # date range queryset을 구한다
         # 주문의 기간 (시작 . 끝 ) / 시작이 없으면 처음, 끝이 없으면 오늘날
         dateRangeQuerySet = getDateRangeQuerySet(self.request)
 
-        return dateRangeQuerySet
+        # price range queryset을 구한다
+        # 주문 가격 (시작 ~ 끝) / 시작이 없으면 끝값 이하, 끝이 없으면 시작 이상
 
-        # return product_querySet & register_date_querySet & hyuser_querySet & quantity_querySet & dateRangeQuerySet
-
+        return  product_querySet\
+                & register_date_querySet\
+                & hyuser_querySet\
+                & quantity_querySet\
+                & dateRangeQuerySet\
         
         # ToDo
 
 
-        # 주문 가격 (시작 ~ 끝) / 시작이 없으면 끝값 이하, 끝이 없으면 시작 이상
 
         # 제품명
 
         # 제품가격
 
         # 제품 총개수 -> 다른곳?
-
-        # email 주소 특정 도매인
 
         # 특정 기간에 가입한
 
@@ -163,10 +183,13 @@ class OrderCreate(FormView):
     def form_valid(self, form):
         with transaction.atomic():
                 productObj = Product.objects.get(pk=form.data.get('product'))
+                quantity = int(form.data.get('quantity'))
+                price = productObj.price * quantity
                 order = Order(
-                    quantity=form.data.get('quantity'),
-                    product=productObj,
-                    hyuser=Hyuser.objects.get(pk=self.request.session.get('user'))
+                    quantity = quantity,
+                    product = productObj,
+                    hyuser = Hyuser.objects.get(pk=self.request.session.get('user')),
+                    price = price
                 )
                 order.save()
                 productObj.stock -= int(form.data.get('quantity'))
