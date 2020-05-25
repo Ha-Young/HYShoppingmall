@@ -18,7 +18,6 @@ import datetime
 # product에 대한 queryset을 가져옵니다
 def getProductQuerySet(req):
     product = req.query_params.get('product', None)
-    print(product)
     product_querySet = Order.objects.all()
 
     if product != None:
@@ -30,8 +29,11 @@ def getProductQuerySet(req):
 
     # product name에 대한 queryset을 가져옵니다
     productname_querySet = getProductNameQuerySet(req)
+
+    # 제품가격 범위에 대한 queryset을 가져옵니다. 
+    productPriceRangeQuerySet = getProductPriceRagneQuerySet(req)
     
-    return product_querySet & productname_querySet
+    return product_querySet & productname_querySet & productPriceRangeQuerySet
 
 # register_date 관련된 queryset을 가져옵니다.
 def getRegisterDateQuerySet(req):
@@ -64,7 +66,10 @@ def getHyuserQuerySet(req):
     # email 주소 특정 도매인에 대한 queryset을 가져옵니다
     email_querySet = getEmailQuerySet(req)
 
-    return hyuser_querySet & email_querySet
+    # 특정 기간에 가입한
+    userRegisterRangeQuerySet = getUserRegisterRangeQuerySet(req)
+
+    return hyuser_querySet & email_querySet & userRegisterRangeQuerySet
 
 # quantity queryset을 가져옵니다
 def getQuantityQuerySet(req):
@@ -123,7 +128,7 @@ def getEmailQuerySet(req):
     email_querySet = Order.objects.all()
 
     if email != None:
-        email_querySet = Order.objects.filter(hyuser__email=email)
+        email_querySet = Order.objects.filter(hyuser__email__contains=email)
 
     return email_querySet
 
@@ -134,9 +139,11 @@ def getProductNameQuerySet(req):
 
     if productname != None:
         productname_querySet = Order.objects.filter(product__name=productname)
+    
+    return productname_querySet
 
 # order price(총 금액)에 대한 queryset을 가져옵니다
-def getPriceRangeQuerySet(req):
+def getOrderPriceRangeQuerySet(req):
     startprice = req.query_params.get('startprice', None)
     endprice = req.query_params.get('endprice', None)
 
@@ -167,11 +174,84 @@ def getPriceRangeQuerySet(req):
 
     return priceRangeQuerySet
 
+def getProductPriceRagneQuerySet(req):
+    startproductprice = req.query_params.get('startproductprice', None)
+    endproductprice = req.query_params.get('endproductprice', None)
+
+    if startproductprice is None and endproductprice is None:
+        return Order.objects.all()
+
+    sortedProductPriceQuerySet = Order.objects.order_by('product__price')
+    ceapest = sortedProductPriceQuerySet[0].product.price
+    expensive = sortedProductPriceQuerySet[sortedProductPriceQuerySet.count() - 1].product.price
+
+    if startproductprice != None:
+        startproductprice = int(startproductprice)
+    else:
+        startproductprice = int(ceapest)
+
+    if endproductprice != None:
+        endproductprice = int(endproductprice)
+    else:
+        endproductprice = int(expensive)
+
+    print(startproductprice, " ~ ", endproductprice)
+
+    if endproductprice < startproductprice:
+        print("uncollect price range")
+        return Order.objects.all()
+
+    priceRangeQuerySet = Order.objects.filter(product__price__range=[startproductprice, endproductprice])
+
+    return priceRangeQuerySet
+
+def getUserRegisterRangeQuerySet(req):
+    startuserregisterday = req.query_params.get('startuserregisterday', None)
+    enduserregisterday = req.query_params.get('enduserregisterday', None)
+    
+    sortedRegisterDateQuerySet = Order.objects.order_by('hyuser__registered_dttm')
+    earliest = sortedRegisterDateQuerySet[0].hyuser.registered_dttm
+
+    # print(earliest, latest)
+    print(earliest, datetime.date.today())
+
+    if startuserregisterday != None:
+        startuserregisterday_split = list(map(int, startuserregisterday.split('-')))
+        if len(startuserregisterday_split) == 3:
+            startuserregisterday = datetime.date(startuserregisterday_split[0], startuserregisterday_split[1], startuserregisterday_split[2])
+        else:
+            startuserregisterday = earliest.date()
+    else:
+        startuserregisterday = earliest.date()
+
+    if enduserregisterday != None:
+        enduserregisterday_split = list(map(int, enduserregisterday.split('-')))
+        if len(enduserregisterday_split) == 3:
+            enduserregisterday = datetime.date(enduserregisterday_split[0], enduserregisterday_split[1], enduserregisterday_split[2]) + datetime.timedelta(days=1)
+        else:
+            enduserregisterday = datetime.date.today() + datetime.timedelta(days=1)
+    else:
+        enduserregisterday = datetime.date.today() + datetime.timedelta(days=1)
+
+
+    print(startuserregisterday, " ~ ", enduserregisterday)
+
+    if enduserregisterday < startuserregisterday:
+        print("uncollect day range")
+        return Order.objects.all()
+
+    dateRangeQuerySet = Order.objects.filter(hyuser__registered_dttm__range=[startuserregisterday, enduserregisterday])
+
+    return dateRangeQuerySet
+
 
 class OrderListAPI(generics.GenericAPIView, mixins.ListModelMixin):
     serializer_class = OrderSerializer
     
     def get_queryset(self):
+
+        return getUserRegisterRangeQuerySet(self.request)
+
         queryset = Order.objects.all()
 
         # product queryset을 구한다
@@ -190,26 +270,18 @@ class OrderListAPI(generics.GenericAPIView, mixins.ListModelMixin):
         # 주문의 기간 (시작 . 끝 ) / 시작이 없으면 처음, 끝이 없으면 오늘날
         dateRangeQuerySet = getDateRangeQuerySet(self.request)
 
-        # price range queryset을 구한다
+        # order price range queryset을 구한다
         # 주문 가격 (시작 ~ 끝) / 시작이 없으면 끝값 이하, 끝이 없으면 시작 이상
-        priceRangeQuerySet = getPriceRangeQuerySet(self.request)
+        orderPriceRangeQuerySet = getOrderPriceRangeQuerySet(self.request)
 
         return  product_querySet\
                 & register_date_querySet\
                 & hyuser_querySet\
                 & quantity_querySet\
                 & dateRangeQuerySet\
-                & priceRangeQuerySet
+                & orderPriceRangeQuerySet
         
         # ToDo
-
-        # 제품명
-
-        # 제품가격
-
-        # 제품 총개수 -> 다른곳?
-
-        # 특정 기간에 가입한
 
         # ordering
 
