@@ -250,10 +250,6 @@ class OrderListAPI(generics.GenericAPIView, mixins.ListModelMixin):
     
     def get_queryset(self):
 
-        return getUserRegisterRangeQuerySet(self.request)
-
-        queryset = Order.objects.all()
-
         # product queryset을 구한다
         product_querySet = getProductQuerySet(self.request)
         
@@ -274,16 +270,20 @@ class OrderListAPI(generics.GenericAPIView, mixins.ListModelMixin):
         # 주문 가격 (시작 ~ 끝) / 시작이 없으면 끝값 이하, 끝이 없으면 시작 이상
         orderPriceRangeQuerySet = getOrderPriceRangeQuerySet(self.request)
 
-        return  product_querySet\
+        querySet = product_querySet\
                 & register_date_querySet\
                 & hyuser_querySet\
                 & quantity_querySet\
                 & dateRangeQuerySet\
                 & orderPriceRangeQuerySet
         
-        # ToDo
-
         # ordering
+        ordering = self.request.query_params.get('ordering', None)
+        if ordering != None:
+            querySet = querySet.order_by(ordering)
+        
+        return querySet
+        
 
     def get(self, request, *args, **kwargs):
         return self.list(request, *args, **kwargs)
