@@ -93,14 +93,14 @@ class OrderCreate(FormView):
 @method_decorator(login_required, name='dispatch')
 class OrderList(ListView):
     template_name = 'order.html'
-    # context_object_name = 'order_list'
+    context_object_name = 'order_list'
 
-    # def get_queryset(self, **kwargs):
-    #     queryset = Order.objects.filter(hyuser__id=self.request.session.get('user'))
-    #     return queryset
+    def get_queryset(self, **kwargs):
+        queryset = Order.objects.filter(hyuser__id=self.request.session.get('user'))
+        return queryset
 
-    def get_context_data(self, **kwargs):
-        context = super(OrderList, self).get_context_data(**kwargs)
-        order_list = requests.get('http://127.0.0.1:8000/api/order/?product=1').json()
-        context['order_list'] = order_list
-        return context 
+    # def get_context_data(self, **kwargs):
+    #     context = super(OrderList, self).get_context_data(**kwargs)
+    #     order_list = requests.get('http://127.0.0.1:8000/api/order/?product=1').json()
+    #     context['order_list'] = order_list
+    #     return context 
