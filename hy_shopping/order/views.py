@@ -1,23 +1,30 @@
+import requests
+
 from django.shortcuts import render, redirect
 from django.views.generic.edit import FormView
 from django.views.generic import ListView
 from django.utils.decorators import method_decorator
 from django.db import transaction
-from .models import Order
-from .forms import RegisterForm
+
+from rest_framework import generics
+from rest_framework import mixins
+
 from product.models import Product
 from hyuser.models import Hyuser
 from hyuser.decorator import login_required
+
 from .serializers import OrderSerializer
-from rest_framework import generics
-from rest_framework import mixins
+from .models import Order
+from .forms import RegisterForm
 from . import query
-import requests
+from .pagenation import OrderPageNumberPagination
+
 # Create your views here.
 
 class OrderListAPI(generics.GenericAPIView, mixins.ListModelMixin):
     serializer_class = OrderSerializer
-    
+    pagination_class = OrderPageNumberPagination
+
     def get_queryset(self):
 
         # product queryset을 구한다
