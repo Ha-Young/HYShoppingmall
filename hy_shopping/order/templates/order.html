@@ -7,6 +7,68 @@
 {% endblock header %}
 {% block contents %}
 
+<div class="row mt-3">
+    <div class="col-12">
+        <h4>검색 옵션</h4>
+        <div>
+            <h5>주문 일자 관련</h5>
+            <div class="m-4">
+                <div>
+                    <span> 특정 기간 : </span> <input id="js-startday"/> ~ <input id="js-endday"/>
+                </div>
+                <div>
+                    <span> 선택 일자(복수 가능) : </span> <input id="js-register_dates"/>
+                </div>
+            </div>
+            <h5>상품 관련</h5>
+            <div class="m-4">
+                <div>
+                    <span> 상품(id, 복수 가능) : </span> <input id="js-products"/>
+                </div>
+                <div>
+                    <span> 상품명 : </span> <input id="js-productname"/>
+                </div>
+                <div>
+                    <span> 제품 가격 범위 : </span> <input id="js-startproductprice"/> ~ <input id="js-endproductprice"/>
+                </div>
+            </div>
+            <h5>유저 관련</h5>
+            <div class="m-4">
+                <div>
+                    <span> 유저(id, 복수 가능) : </span> <input id="js-users"/> ~ <input id="js-endproductprice"/>
+                </div>
+                <div>
+                    <span> 유저 email(특정 도메인) : </span> <input id="js-startproductprice"/> ~ <input id="js-endproductprice"/>
+                </div>
+                <div>
+                    <span> 가입 일자 : </span> <input id="js-startuserregisterday"/> ~ <input id="js-enduserregisterday"/>
+                </div>
+            </div>
+            <h5>주문 관련</h5>
+            <div class="m-4">
+                <div>
+                    <span> 주문양 : </span> <input id="js-quantity"/>
+                </div>
+                <div>
+                    <span> 주문 가격 : </span> <input id="js-startprice"/> ~ <input id="js-endprice"/>
+                </div>
+            </div>
+            <h5> 정렬 : </h5>
+            <div class="m-4">
+                <div>
+                    <input type="radio" name="radio_info" value="price">주문 금액
+                    <input type="radio" name="radio_info" value="웹디자인">주문 수량
+                    <input type="radio" name="radio_info" value="웹디자인" checked>등록일
+                </div>
+                <div>
+                    <input type="checkbox" name="chk_info" value="HTML">역순
+                </div>
+            </div>
+            
+        </div>
+    </div>
+</div>
+
 <div class="row mt-5">
     <div class="col-12">
         <table class="table table-light">
