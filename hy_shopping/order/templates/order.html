@@ -6,45 +6,53 @@
 </script>
 {% endblock header %}
 {% block contents %}
+<div>
 
-<div class="row mt-3">
-    <div class="col-12">
-        <h4>검색 옵션</h4>
-        <div>
+    <h4>검색 옵션</h4>
+    <div class="row mt-3 search-ui">
+        <div class="col-6">
             <h5>주문 일자 관련</h5>
             <div class="m-4">
-                <div>
-                    <span> 특정 기간 : </span> <input id="js-startday"/> ~ <input id="js-endday"/>
+                <div class="mt-2 form-group">
+                    <label class="col-form-label col-form-label-sm" for="js-startday"> 특정 기간 : </label> 
+                    <input id="js-startday" class="form-control form-control-sm w-25" type="text" placeholder="yyyy-mm-dd"/>
+                    <input id="js-endday" class="form-control form-control-sm w-25"/>
                 </div>
-                <div>
+                <div class="mt-2">
                     <span> 선택 일자(복수 가능) : </span> <input id="js-register_dates"/>
                 </div>
             </div>
+        </div>
+        <div class="col-6">
             <h5>상품 관련</h5>
             <div class="m-4">
-                <div>
+                <div class="mt-2">
                     <span> 상품(id, 복수 가능) : </span> <input id="js-products"/>
                 </div>
-                <div>
+                <div class="mt-2">
                     <span> 상품명 : </span> <input id="js-productname"/>
                 </div>
-                <div>
-                    <span> 제품 가격 범위 : </span> <input id="js-startproductprice"/> ~ <input id="js-endproductprice"/>
+                <div class="mt-2">
+                    <div> 제품 가격 범위 : </div> <input id="js-startproductprice"/> ~ <input id="js-endproductprice"/>
                 </div>
             </div>
+        </div>
+        <div class="col-6">
             <h5>유저 관련</h5>
             <div class="m-4">
-                <div>
-                    <span> 유저(id, 복수 가능) : </span> <input id="js-users"/> ~ <input id="js-endproductprice"/>
+                <div class="mt-2">
+                    <div> 유저(id, 복수 가능) : </div> <input id="js-users"/> ~ <input id="js-endproductprice"/>
                 </div>
-                <div>
-                    <span> 유저 email(특정 도메인) : </span> <input id="js-startproductprice"/> ~ <input id="js-endproductprice"/>
+                <div class="mt-2">
+                    <span> 유저 email(특정 도메인) : </span> <input id="js-email"/>
                 </div>
-                <div>
-                    <span> 가입 일자 : </span> <input id="js-startuserregisterday"/> ~ <input id="js-enduserregisterday"/>
+                <div class="mt-2">
+                    <div> 가입 일자 : </div> <input id="js-startuserregisterday"/> ~ <input id="js-enduserregisterday"/>
                 </div>
             </div>
-            <h5>주문 관련</h5>
+        </div>
+        <div class="col-6">
+        <h5>주문 관련</h5>
             <div class="m-4">
                 <div>
                     <span> 주문양 : </span> <input id="js-quantity"/>
@@ -53,6 +61,8 @@
                     <span> 주문 가격 : </span> <input id="js-startprice"/> ~ <input id="js-endprice"/>
                 </div>
             </div>
+        </div>
+        <div class="col-6">
             <h5> 정렬 : </h5>
             <div class="m-4">
                 <div>
@@ -63,9 +73,8 @@
                 <div>
                     <input type="checkbox" name="chk_info" value="HTML">역순
                 </div>
-            </div>
-            
-        </div>
+            </div>    
+        </div> 
     </div>
 </div>
 
