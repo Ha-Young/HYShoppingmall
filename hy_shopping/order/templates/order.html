@@ -1,19 +1,111 @@
 {% extends 'base.html' %}
 {% load humanize %}
 {% block header %}
+<link rel="stylesheet" href="//code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css">
+<script src="//code.jquery.com/ui/1.11.4/jquery-ui.min.js"></script>
+
 <script>
+const ORDERLIST_API_URL = "http://127.0.0.1:8000/api/order/?";
+
 $( document ).ready( function() {
-        $( '#search-toggle' ).click( function() {
-            var $element = $('#search-option');
-            if ($element.is(':hidden')) {
-                $element.fadeIn();
-            }
-            else {
-                $element.fadeOut();
-            }
-          
-        } );
-      } );
+    // 검색 옵션 토글
+    $( '#search-toggle' ).click( function() {
+        var $element = $('#search-option');
+        if ($element.is(':hidden')) {
+            $element.fadeIn();
+        }
+        else {
+            $element.fadeOut();
+        }
+    });
+
+    // 검색 버튼 클릭
+    $('#js-search').click(function() {
+        let queryArr = [];
+
+        let startday = $('#js-startday').val();
+        let endday = $('#js-endday').val();
+        let register_dates = $('#js-register_dates').val();
+        let products = $('#js-products').val();
+        let productname = $('#js-productname').val();
+        let startproductprice = $('#js-startproductprice').val();
+        let endproductprice = $('#js-endproductprice').val();
+        let users = $('#js-users').val();
+        let email = $('#js-email').val();
+        let startuserregisterday = $('#js-startuserregisterday').val();
+        let enduserregisterday = $('#js-enduserregisterday').val();
+        let quantity = $('#js-quantity').val();
+        let startprice = $('#js-startprice').val();
+        let endprice = $('#js-endprice').val();
+        let ordering;
+        if ($("#ordering-price").hasClass("active"))
+            ordering = "price";
+        else if($("#ordering-quantity").hasClass("active"))
+            ordering = "quantity";
+        else
+            ordering = "register_date";
+
+        if ($("#ordering-desc").hasClass("active"))
+            ordering = "-" + ordering;
+
+        if (startday)
+            queryArr.push("startday=" + startday.replace(/(\s*)/g,""));
+        
+        if (endday)
+            queryArr.push("endday=" + endday.replace(/(\s*)/g,""));
+        
+        if (register_dates)
+            queryArr.push("register_dates=" + register_dates.replace(/(\s*)/g,""));
+
+        if (products)
+            queryArr.push("products=" + products.replace(/(\s*)/g,""));
+
+        if (productname)
+            queryArr.push("productname=" + productname);
+
+        if (startproductprice)
+            queryArr.push("startproductprice=" + startproductprice);
+
+        if (endproductprice)
+            queryArr.push("endproductprice=" + endproductprice);
+
+        if (users)
+            queryArr.push("users=" + users.replace(/(\s*)/g,""));
+        
+        if (email)
+            queryArr.push("email=" + email);
+
+        if (startuserregisterday)
+            queryArr.push("startuserregisterday=" + startuserregisterday);
+
+        if (enduserregisterday)
+            queryArr.push("enduserregisterday=" + enduserregisterday);
+
+        if (quantity)
+            queryArr.push("quantity=" + quantity);
+
+        if (startprice)
+            queryArr.push("startprice=" + startprice);
+
+        if (endprice)
+            queryArr.push("endprice=" + endprice);
+
+        if (ordering)
+            queryArr.push("ordering=" + ordering);
+
+        let queryString = queryArr.join('&');
+        console.log(ORDERLIST_API_URL + queryString);
+        
+        
+});
+});
+$( function() {
+    $(".datePicker").datepicker({
+        dateFormat: 'yy-mm-dd'
+    });
+});
+
+
 </script>
 {% endblock header %}
 {% block contents %}
@@ -25,13 +117,13 @@ $( document ).ready( function() {
             <div class="m-4">
                 <div class="mt-2 form-group">
                     <label class="col-form-label col-form-label-sm" for="js-startday"> 특정 기간 : </label> 
-                    <input id="js-startday" class="w-25" type="text" placeholder="yyyy-mm-dd"/>
+                    <input id="js-startday" class="datePicker w-25" type="text" placeholder="yyyy-mm-dd"/>
                     ~
-                    <input id="js-endday" class="w-25" type="text" placeholder="yyyy-mm-dd"/>
+                    <input id="js-endday" class="datePicker w-25" type="text" placeholder="yyyy-mm-dd"/>
                 </div>
                 <div class="mt-2">
                     <label class="col-form-label col-form-label-sm" for="js-register_dates"> 선택 일자(복수 가능) : </label> 
-                    <input id="js-register_dates" class="w-25" type="text" placeholder="yyyy-mm-dd"/>
+                    <input id="js-register_dates" class="datePicker w-25" type="text" placeholder="yyyy-mm-dd"/>
                 </div>
             </div>
         </div>
@@ -60,8 +152,6 @@ $( document ).ready( function() {
                 <div class="mt-2">
                     <label class="col-form-label col-form-label-sm"> 유저(id, 복수 가능) : </label>
                     <input id="js-users" class="w-25"/>
-                     ~ 
-                    <input id="js-endproductprice" class="w-25"/>
                 </div>
                 <div class="mt-2">
                     <label class="col-form-label col-form-label-sm"> 유저 email(특정 도메인) : </label> 
@@ -69,9 +159,9 @@ $( document ).ready( function() {
                 </div>
                 <div class="mt-2">
                     <label class="col-form-label col-form-label-sm"> 가입 일자 : </label> 
-                    <input id="js-startuserregisterday" class="w-25" type="text" placeholder="yyyy-mm-dd"/>
+                    <input id="js-startuserregisterday" class="datePicker w-25" type="text" placeholder="yyyy-mm-dd"/>
                      ~ 
-                    <input id="js-enduserregisterday" class="w-25" type="text" placeholder="yyyy-mm-dd"/>
+                    <input id="js-enduserregisterday" class="datePicker w-25" type="text" placeholder="yyyy-mm-dd"/>
                 </div>
             </div>
         </div>
@@ -95,20 +185,20 @@ $( document ).ready( function() {
             <div class="m-4">
                 <div class="bs-component mb-2">
                     <div class="btn-group btn-group-toggle" data-toggle="buttons">
-                        <label class="btn btn-primary">
-                            <input type="radio" name="options" id="ordering-price" autocomplete="off"> 주문 금액
+                        <label class="btn btn-primary" id="ordering-price">
+                            <input type="radio" name="options" autocomplete="off"> 주문 금액
                         </label>
-                        <label class="btn btn-primary">
-                            <input type="radio" name="options" id="ordering-quantity" autocomplete="off"> 주문 수량
+                        <label class="btn btn-primary" id="ordering-quantity">
+                            <input type="radio" name="options" autocomplete="off"> 주문 수량
                         </label>
-                        <label class="btn btn-primary active">
-                            <input type="radio" name="options" id="ordering-register" autocomplete="off" checked> 등록일
+                        <label class="btn btn-primary active" id="ordering-register">
+                            <input type="radio" name="options" autocomplete="off" checked> 등록일
                         </label>
                     </div>
                 </div>
                 <div class="bs-component">
                     <div class="btn-group btn-group-toggle" data-toggle="buttons">
-                        <label class="btn btn-primary">
+                        <label class="btn btn-primary" id="ordering-desc">
                             <input type="checkbox" autocomplete="off"> 역순
                         </label>
                     </div>
