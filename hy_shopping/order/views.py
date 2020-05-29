@@ -26,7 +26,6 @@ class OrderListAPI(generics.GenericAPIView, mixins.ListModelMixin):
     pagination_class = OrderPageNumberPagination
 
     def get_queryset(self):
-
         # product queryset을 구한다
         product_querySet = query.getProductQuerySet(self.request)
         
@@ -57,6 +56,8 @@ class OrderListAPI(generics.GenericAPIView, mixins.ListModelMixin):
         # ordering
         querySet = query.getOrderingQuerySet(self.request, querySet)
         
+        # productname 추가
+        querySet = querySet.prefetch_related('product')
         return querySet
         
 
@@ -103,7 +104,7 @@ class OrderList(ListView):
     context_object_name = 'order_list'
 
     def get_queryset(self, **kwargs):
-        queryset = Order.objects.filter(hyuser__id=self.request.session.get('user'))
+        queryset = Order.objects.all()
         return queryset
 
     # def get_context_data(self, **kwargs):

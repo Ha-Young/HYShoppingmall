@@ -7,10 +7,83 @@
 <script>
 const ORDERLIST_API_URL = "http://127.0.0.1:8000/api/order/?";
 
+function resetDataTable(){
+    $("#js-orderList").remove();
+    let dataTable = document.createElement("tbody");
+    dataTable.id = "js-orderList";
+    dataTable.class = "text-dark";
+
+    document.getElementById("js-orderTable").appendChild(dataTable);
+}
+
+function makeTh(value){
+    let thElement = document.createElement("th");
+    thElement.scope = "row";
+    thElement.innerHTML = value;
+
+    return thElement;
+}
+
+function setDataList(orderList){
+    let orderList_tbody = document.getElementById("js-orderList");
+
+    orderList.forEach(order => {
+        let dataRow = document.createElement("tr");
+        dataRow.appendChild(makeTh(order.id));
+        dataRow.appendChild(makeTh(order.product_name));
+        dataRow.appendChild(makeTh(order.quantity));
+        dataRow.appendChild(makeTh(order.register_date));
+        orderList_tbody.appendChild(dataRow);
+    });
+}
+
+function removeNextPrevBtns()
+{
+    pagenationDiv = document.getElementById("pagenation");
+    while (pagenationDiv.firstChild) {
+        pagenationDiv.removeChild(pagenationDiv.lastChild);
+    }
+}
+
+function setPageBtn(pageAPI, btnText)
+{
+    let pageBtn = document.createElement("button");
+    pageBtn.addEventListener("click", function(){
+        callAjaxOrderQuery(pageAPI);
+    });
+    pageBtn.class = "pagenation";
+    pageBtn.innerHTML = btnText;
+
+    document.getElementById("pagenation").appendChild(pageBtn);
+}
+
+function setNextPrevBtn(result){
+    removeNextPrevBtns();
+
+    if (result.previous)
+        setPageBtn(result.previous, "prev");
+
+    if (result.next)
+        setPageBtn(result.next, "next");
+    
+}
+
+function callAjaxOrderQuery(apiURL){
+    $.ajax({
+            url: apiURL,
+            success: function(result){
+                console.log(result);
+                resetDataTable();
+                setDataList(result.results);
+                setNextPrevBtn(result);
+            }
+        });
+}
+
 $( document ).ready( function() {
     // 검색 옵션 토글
     $( '#search-toggle' ).click( function() {
-        var $element = $('#search-option');
+        let $element = $('#search-option');
         if ($element.is(':hidden')) {
             $element.fadeIn();
         }
@@ -96,8 +169,8 @@ $( document ).ready( function() {
         let queryString = queryArr.join('&');
         console.log(ORDERLIST_API_URL + queryString);
         
-        
-});
+        callAjaxOrderQuery(ORDERLIST_API_URL + queryString);
+    });
 });
 $( function() {
     $(".datePicker").datepicker({
@@ -211,9 +284,14 @@ $( function() {
     </div>
 </div>
 
+
+
 <div class="row mt-5">
     <div class="col-12">
-        <table class="table table-light">
+        <div id="pagenation">
+
+        </div>
+        <table id="js-orderTable" class="table table-light">
             <thead class="thead-light">
                 <tr>
                     <th scope="col">#</th>
@@ -222,13 +300,13 @@ $( function() {
                     <th scope="col">주문날자</th>
                 </tr>
             </thead>
-            <tbody class="text-dark">
+            <tbody id="js-orderList" class="text-dark">
                 {% for order in order_list %}
                 <tr>
                     <th scope="row">{{ order.id }}</th>
                     <th scope="row">{{ order.product }}</th>
                     <th scope="row">{{ order.quantity | intcomma}}</th>
-                    <th scope="row">{{ order.registered_dttm | date:'Y-m-d H:i' }}</th>
+                    <th scope="row">{{ order.register_date | date:'Y-m-d H:i' }}</th>
                 </tr>
                 {% endfor %}
             </tbody>
