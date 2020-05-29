@@ -2,24 +2,36 @@
 {% load humanize %}
 {% block header %}
 <script>
-    
+$( document ).ready( function() {
+        $( '#search-toggle' ).click( function() {
+            var $element = $('#search-option');
+            if ($element.is(':hidden')) {
+                $element.fadeIn();
+            }
+            else {
+                $element.fadeOut();
+            }
+          
+        } );
+      } );
 </script>
 {% endblock header %}
 {% block contents %}
-<div>
-
-    <h4>검색 옵션</h4>
+<button id="search-toggle" class="btn btn-success mt-2">검색 옵션 보기</button>
+<div id="search-option" style="display: none; margin-top:10px;">
     <div class="row mt-3 search-ui">
         <div class="col-6">
             <h5>주문 일자 관련</h5>
             <div class="m-4">
                 <div class="mt-2 form-group">
                     <label class="col-form-label col-form-label-sm" for="js-startday"> 특정 기간 : </label> 
-                    <input id="js-startday" class="form-control form-control-sm w-25" type="text" placeholder="yyyy-mm-dd"/>
-                    <input id="js-endday" class="form-control form-control-sm w-25"/>
+                    <input id="js-startday" class="w-25" type="text" placeholder="yyyy-mm-dd"/>
+                    ~
+                    <input id="js-endday" class="w-25" type="text" placeholder="yyyy-mm-dd"/>
                 </div>
                 <div class="mt-2">
-                    <span> 선택 일자(복수 가능) : </span> <input id="js-register_dates"/>
+                    <label class="col-form-label col-form-label-sm" for="js-register_dates"> 선택 일자(복수 가능) : </label> 
+                    <input id="js-register_dates" class="w-25" type="text" placeholder="yyyy-mm-dd"/>
                 </div>
             </div>
         </div>
@@ -27,13 +39,18 @@
             <h5>상품 관련</h5>
             <div class="m-4">
                 <div class="mt-2">
-                    <span> 상품(id, 복수 가능) : </span> <input id="js-products"/>
+                    <label class="col-form-label col-form-label-sm"> 상품(id, 복수 가능) : </label> 
+                    <input id="js-products" class="w-25"/>
                 </div>
                 <div class="mt-2">
-                    <span> 상품명 : </span> <input id="js-productname"/>
+                    <label class="col-form-label col-form-label-sm"> 상품명 : </label> 
+                    <input id="js-productname" class="w-25"/>
                 </div>
                 <div class="mt-2">
-                    <div> 제품 가격 범위 : </div> <input id="js-startproductprice"/> ~ <input id="js-endproductprice"/>
+                    <label class="col-form-label col-form-label-sm"> 제품 가격 범위 : </label> 
+                    <input id="js-startproductprice" class="w-25"/>
+                     ~ 
+                    <input id="js-endproductprice" class="w-25"/>
                 </div>
             </div>
         </div>
@@ -41,40 +58,66 @@
             <h5>유저 관련</h5>
             <div class="m-4">
                 <div class="mt-2">
-                    <div> 유저(id, 복수 가능) : </div> <input id="js-users"/> ~ <input id="js-endproductprice"/>
+                    <label class="col-form-label col-form-label-sm"> 유저(id, 복수 가능) : </label>
+                    <input id="js-users" class="w-25"/>
+                     ~ 
+                    <input id="js-endproductprice" class="w-25"/>
                 </div>
                 <div class="mt-2">
-                    <span> 유저 email(특정 도메인) : </span> <input id="js-email"/>
+                    <label class="col-form-label col-form-label-sm"> 유저 email(특정 도메인) : </label> 
+                    <input id="js-email" class="w-25"/>
                 </div>
                 <div class="mt-2">
-                    <div> 가입 일자 : </div> <input id="js-startuserregisterday"/> ~ <input id="js-enduserregisterday"/>
+                    <label class="col-form-label col-form-label-sm"> 가입 일자 : </label> 
+                    <input id="js-startuserregisterday" class="w-25" type="text" placeholder="yyyy-mm-dd"/>
+                     ~ 
+                    <input id="js-enduserregisterday" class="w-25" type="text" placeholder="yyyy-mm-dd"/>
                 </div>
             </div>
         </div>
         <div class="col-6">
         <h5>주문 관련</h5>
             <div class="m-4">
-                <div>
-                    <span> 주문양 : </span> <input id="js-quantity"/>
+                <div class="mt-2">
+                    <label class="col-form-label col-form-label-sm"> 주문양 : </label>
+                    <input id="js-quantity" class="w-25"/>
                 </div>
-                <div>
-                    <span> 주문 가격 : </span> <input id="js-startprice"/> ~ <input id="js-endprice"/>
+                <div class="mt-2">
+                    <label class="col-form-label col-form-label-sm"> 주문 가격 : </label>
+                    <input id="js-startprice" class="w-25"/>
+                     ~ 
+                    <input id="js-endprice" class="w-25"/>
                 </div>
             </div>
         </div>
         <div class="col-6">
-            <h5> 정렬 : </h5>
+            <h5> 정렬 옵션 : </h5>
             <div class="m-4">
-                <div>
-                    <input type="radio" name="radio_info" value="price">주문 금액
-                    <input type="radio" name="radio_info" value="웹디자인">주문 수량
-                    <input type="radio" name="radio_info" value="웹디자인" checked>등록일
+                <div class="bs-component mb-2">
+                    <div class="btn-group btn-group-toggle" data-toggle="buttons">
+                        <label class="btn btn-primary">
+                            <input type="radio" name="options" id="ordering-price" autocomplete="off"> 주문 금액
+                        </label>
+                        <label class="btn btn-primary">
+                            <input type="radio" name="options" id="ordering-quantity" autocomplete="off"> 주문 수량
+                        </label>
+                        <label class="btn btn-primary active">
+                            <input type="radio" name="options" id="ordering-register" autocomplete="off" checked> 등록일
+                        </label>
+                    </div>
                 </div>
-                <div>
-                    <input type="checkbox" name="chk_info" value="HTML">역순
+                <div class="bs-component">
+                    <div class="btn-group btn-group-toggle" data-toggle="buttons">
+                        <label class="btn btn-primary">
+                            <input type="checkbox" autocomplete="off"> 역순
+                        </label>
+                    </div>
                 </div>
             </div>    
         </div> 
+        <div class="col-6" style="display: flex; flex-direction: row-reverse; justify-content:center; align-items:center;">
+            <button id="js-search" class="btn btn-warning mt-2" style="height:50px">검색</button>
+        </div>
     </div>
 </div>
 
